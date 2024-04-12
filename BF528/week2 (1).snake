@@ -6,6 +6,7 @@ rule all:
         'results/gencode.vM33.primary_assembly.annotation.gtf',
         expand('results/{names}_flagstats.txt', names=NAMES)
 
+# rule to get reference genome FASTA file
 rule get_m39:
     output:
         'results/GRCm39.primary_assembly.genome.fa.gz'
@@ -15,7 +16,7 @@ rule get_m39:
         '''
         wget -P results {params.ftp_m39}
         '''
-
+# rule to get matching GTF file
 rule get_m39_gtf:
     output:
         'results/gencode.vM33.primary_assembly.annotation.gtf.gz'
@@ -25,7 +26,7 @@ rule get_m39_gtf:
         '''
         wget -P results {params.ftp_gtf}
         '''
-
+# unzip the gtf file
 rule unzip:
     input:
         gz='results/gencode.vM33.primary_assembly.annotation.gtf.gz'
@@ -35,7 +36,7 @@ rule unzip:
         '''
         gunzip -c {input.gz} > {output.gtf}
         '''
-
+# star for sample alignment to provided STAR index.
 rule star:
     input:
         r1='samples/{names}_R1.fastq.gz',
@@ -50,7 +51,7 @@ rule star:
         '''
         STAR --runThreadN {threads} --genomeDir {input.star_dir} --readFilesIn {input.r1} {input.r2} --readFilesCommand zcat --outSAMtype BAM Unsorted --outFileNamePrefix {params.prefix}
         '''
-
+# Post alignment Quality Control
 rule samtools_flagstat:
     input:
         bam='results/{names}.Aligned.out.bam'
