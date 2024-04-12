@@ -1,0 +1,42 @@
+# use the names variable to store your list of file names
+names = ['ADrep1_R1', 'ADrep1_R2', 'ADrep2_R1', 'ADrep2_R2', 'P0rep1_R1', 'P0rep1_R2', 'P0rep2_R1', 'P0rep2_R2', 'P4rep1_R1', 'P4rep1_R2', 'P4rep2_R1', 'P4rep2_R2', 'P7rep1_R1', 'P7rep1_R2', 'P7rep2_R1', 'P7rep2_R2']
+
+# your snakemake rule should produce the output from MultiQC and if you link your rules inputs
+# and outputs, you should only have one file listed in your rule all
+rule all:
+    input:
+        expand('results/{name}_fastqc.html', name=names),
+        'results/multiqc_report.html'
+
+# make sure to read the fastqc manual to get a sense for appropriate running command
+# we have given you the basic structure of the snakemake rule to get you used to how they
+# are structured
+rule fastqc:
+    input:
+        fastq = 'samples/{name}.fastq.gz',
+    output:
+        fastqc = 'results/{name}_fastqc.html'
+    params:
+        outdir = 'results/'
+    threads: 4 
+    
+    conda: 
+        ''envs/fastqc_env.yml''
+    shell:
+        '''
+        fastqc {input.fastq} --outdir {params.outdir}
+        '''
+
+# remember that you want multiqc to run only after fastqc has run on all the files
+rule multiqc:
+    input:
+        expand('results/{name}_fastqc.html', name=names),
+    output:
+        'results/multiqc_report.html'
+    params:
+        outdir = 'results/'
+    shell:
+        '''
+        multiqc {params.outdir} -o {params.outdir} -f
+        '''
+
